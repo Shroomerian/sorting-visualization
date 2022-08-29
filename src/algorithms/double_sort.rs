@@ -12,14 +12,13 @@ double_sort = "1.0.0"
 ```
 */
 
+const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 0.8];
+
+
 use super::{Algorithm, Array};
+use double_sort::double_sort;
 
-use std::collections::BinaryHeap;
-use std::cmp::Reverse;
-use std::cmp::Ordering;
-use std::convert::TryInto;
-
-#[derive(PartialEq,PartialOrd,Eq,Debug)]
+#[derive(PartialEq,PartialOrd,Eq,Debug,Clone, Copy)]
 struct Node(u32,Option<u32>); 
 
 impl Node {
@@ -39,12 +38,23 @@ impl Node {
         }
     }
 
-    fn get_left(&self) -> u32 {
-        self.0
+    fn contains(&self,element: u32) -> bool {
+        if element == self.0 {
+            true
+        } else {
+            false
+        }
     }
 
-    fn get_right(&self) -> u32 {
-        self.1.unwrap()
+    fn change_array(&self,counter: usize, array: &Array) {
+        array.set(counter,self.0);
+        array.set_color(counter, GREEN);
+
+        if let Some(_number) = self.1 {
+            array.set(counter+1,self.1.unwrap());
+            array.set_color(counter+1,GREEN);
+
+        }
     }
 
 }
@@ -59,91 +69,73 @@ fn switch<T: PartialOrd>(left: &mut T,right: &mut T) -> bool {
     }
 }
 
-impl Ord for Node {
-    fn cmp(&self,other: &Self) -> Ordering {
-        self.0.cmp(&other.0)
-    }
-}
 
-pub fn double_sort(list: Array) {
-    
+pub fn double_graphic_sort(array: Array) {
 
-    if list.len() <= 2 {
-        let mut node = Node(list.get(0),Some(list.get(1)));
+    //Mutable values used to control the while loop
+    let mut counter = 0; //Amount of times the loop ran for
+    let mut nothing = 0; //Amount of times nothing was done on a read
+
+    if array.len() <= 2 {
+
+        if array.len() == 1 {
+            return;
+        }
+
+        let mut node = Node(array.get(0),Some(array.get(1)));
+
         node.order();
 
-        
-        list.set(0,node.get_left());
-        list.set_color(0, [0.0, 1.0, 0.0, 0.8]);
-        
-        if !node.none_present() {
-        list.set(1,node.get_right());
-        list.set_color(1, [0.0, 1.0, 0.0, 0.8]);
-        }
-        
         return;
     }
 
-    //BinaryHeap is used due to it's efficient ordering capabilities.
-    let mut heap = BinaryHeap::new();
 
-    //Mutable values used to control the while loop
-    let _counter = 0; //Amount of times the loop ran for
-    let mut nothing = 0; //Amount of times nothing was done on a read
-
-    let mut _counter = 0;
+    let mut vector = Vec::new();
 
     let mut node: Node;
 
-    while _counter != list.len() {
+    while counter < array.len() - 1 {
 
-        let left = list.get(_counter);
-
-        if _counter == list.len() - 1 {
-            node = Node(left,None);
-
+        if counter % 2 == 0 {
+            node = Node(array.get(counter),Some(array.get(counter+1)));
             node.order();
-            heap.push(Reverse(node));
-            break;
+            vector.push(node);
         }
 
-        _counter += 1;
+        counter += 1;
+    }
+    
+    let mut reference_vec = Vec::new();
+    let mut temp_vec = Vec::new();
 
-        let right = list.get(_counter);
-
-        node = Node(left,Some(right));
-
-        node.order();
-        heap.push(Reverse(node));
-
-        _counter += 1;
+    for node in &vector {
+        temp_vec.push(node.0);
     }
 
-    _counter = 0;
+    double_sort(&mut temp_vec);
 
-    let mut total = 0;
+    for reference in temp_vec {
+        let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
+
+        reference_vec.push(left_node);
+    }
+
+    vector = reference_vec;
+
+    //Reset counter
+    counter = 0;
 
     //Final sort of the values by comparing left and right values of neighbouring nodes
     loop {
-        let mut left = heap.pop().unwrap().0;
 
-        if heap.is_empty() {
-            list.set(_counter, left.get_left());
-            list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
+        let mut left = vector[counter];
 
-            _counter += 1;
-
-            if !left.none_present() {
-                list.set(_counter,left.get_right());
-                list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-
-                _counter += 1;
-            }
-            
+        if counter == vector.len() - 1 {
+            left.change_array(counter,&array);
             break;
         }
 
-        let mut right = heap.pop().unwrap().0;
+        let mut right = vector[counter+1];
 
         let switched: bool; //Checks whether anything was changed
 
@@ -154,123 +146,90 @@ pub fn double_sort(list: Array) {
         }
 
         if !switched {
-            list.set(_counter, left.get_left());
-            list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-
-            _counter += 1;
-
-            if !left.none_present() {
-                list.set(_counter,left.get_right());
-                list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-
-                _counter += 1;
-            }
+            vector[counter] = left;
 
             //Increment the times where read did nothing
             nothing += 1;
+            counter += 1;
 
             if right.none_present() {
-                list.set(_counter,right.get_left());
-                list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
+                vector[counter] = right;
 
-                _counter += 1;
 
-                if heap.len() == 1 {
-                    let left = heap.pop().unwrap().0;
+                if counter == vector.len() - 1 {
+                    break;
+                }
 
-                    list.set(_counter, left.get_left());
-                    list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
+                if counter == vector.len() - 2 {
+                    let left = vector[counter+1];
 
-                    _counter += 1;
-        
-                    if !left.none_present() {
-                        list.set(_counter,left.get_right());
-                        list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-
-                        _counter += 1;
-                    }
 
                     //Info dump
                     #[cfg(debug_assertions)]
                     {
-                        println!("Total reads done: {}",_counter);
-                        println!("Total number of memory switches: {}", _counter - nothing);
+                        println!("Total reads done: {}",counter);
+                        println!("Total number of memory switches: {}", counter - nothing);
                     }
 
                     break;
                 }
                 
-            } else {
-                heap.push(Reverse(right));
             }
-
             continue;
         }
 
         left.order();
         right.order();
 
-        total += 1;
-
-        if heap.is_empty() {
-            list.set(_counter, left.get_left());
-            list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-    
-            _counter += 1;
-    
-            if !left.none_present() {
-                list.set(_counter,left.get_right());
-                list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-    
-                _counter += 1;
-            }
-            
-            list.set(_counter, right.get_left());
-            list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-    
-            _counter += 1;
-    
-            if !right.none_present() {
-                list.set(_counter,right.get_right());
-                list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-    
-                _counter += 1;
-            }
-
-            break;
-        }
+        vector[counter] = left;
+        vector[counter+1] = right;
+        //Increment counter
+        counter += 1;
 
         //Everything is pushed back into the heap so nothing is lost.
-        list.set(_counter, left.get_left());
-        list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
 
-        _counter += 1;
+        let mut temp_vec = Vec::new();
+        let mut reference_vec = Vec::new();
 
-        if !left.none_present() {
-            list.set(_counter,left.get_right());
-            list.set_color(_counter, [0.0, 1.0, 0.0, 0.8]);
-
-            _counter += 1;
+        for node in &vector {
+            temp_vec.push(node.0);
         }
+    
+        double_sort(&mut temp_vec);
+    
+        for reference in temp_vec {
+            let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
+    
+            reference_vec.push(left_node);
+        }
+    
+        vector = reference_vec;
 
-        heap.push(Reverse(right));
+    }
 
+    counter = 0;
+
+    for node in vector {
+        node.change_array(counter,&array);
+        counter += 2;
     }
 
     //Info dump
     #[cfg(debug_assertions)]
     {
-        println!("Total reads done: {}",total);
-        println!("Total number of memory switches: {}", total - nothing);
+        println!("Total reads done: {}",counter);
+        println!("Total number of memory switches: {}", counter - nothing);
     }
 
 }
+
+
 
 pub struct DoubleSort;
 
 impl Algorithm for DoubleSort {
     fn sort(&self, array: Array) {
-        double_sort(array);
+        double_graphic_sort(array);
     }
 
     fn name(&self) -> String {
