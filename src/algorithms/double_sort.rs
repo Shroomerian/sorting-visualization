@@ -46,14 +46,21 @@ impl Node {
         }
     }
 
-    fn change_array(&self,counter: usize, array: &Array) {
-        array.set(counter,self.0);
-        array.set_color(counter, GREEN);
+    fn change_array(&self,index: usize, array: &Array) {
+        array.set(index,self.0);
 
         if let Some(_number) = self.1 {
-            array.set(counter+1,self.1.unwrap());
-            array.set_color(counter+1,GREEN);
+            array.set(index+1,self.1.unwrap());
+        }
+    }
 
+    fn sort_array(&self,index: usize, array: &Array) {
+        array.set(index,self.0);
+        array.set_color(index, GREEN);
+
+        if let Some(_number) = self.1 {
+            array.set(index+1,self.1.unwrap());
+            array.set_color(index+1,GREEN);
         }
     }
 
@@ -74,6 +81,7 @@ pub fn double_graphic_sort(array: Array) {
 
     //Mutable values used to control the while loop
     let mut counter = 0; //Amount of times the loop ran for
+    let mut index = 0;
     let mut nothing = 0; //Amount of times nothing was done on a read
 
     if array.len() <= 2 {
@@ -117,13 +125,18 @@ pub fn double_graphic_sort(array: Array) {
     for reference in temp_vec {
         let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
 
+        left_node.change_array(index, &array);
+
         reference_vec.push(left_node);
+
+        index += 2;
     }
 
     vector = reference_vec;
 
     //Reset counter
     counter = 0;
+    index = 0;
 
     //Final sort of the values by comparing left and right values of neighbouring nodes
     loop {
@@ -131,7 +144,7 @@ pub fn double_graphic_sort(array: Array) {
         let mut left = vector[counter];
 
         if counter == vector.len() - 1 {
-            left.change_array(counter,&array);
+            left.sort_array(index,&array);
             break;
         }
 
@@ -147,6 +160,9 @@ pub fn double_graphic_sort(array: Array) {
 
         if !switched {
             vector[counter] = left;
+            left.sort_array(index,&array);
+
+            index += 2;
 
             //Increment the times where read did nothing
             nothing += 1;
@@ -155,6 +171,9 @@ pub fn double_graphic_sort(array: Array) {
             if right.none_present() {
                 vector[counter] = right;
 
+                right.sort_array(index,&array);
+
+                index += 2;
 
                 if counter == vector.len() - 1 {
                     break;
@@ -163,6 +182,7 @@ pub fn double_graphic_sort(array: Array) {
                 if counter == vector.len() - 2 {
                     let left = vector[counter+1];
 
+                    left.sort_array(index,&array);
 
                     //Info dump
                     #[cfg(debug_assertions)]
@@ -186,6 +206,10 @@ pub fn double_graphic_sort(array: Array) {
         //Increment counter
         counter += 1;
 
+        left.sort_array(index,&array);
+
+        index += 2;
+
         //Everything is pushed back into the heap so nothing is lost.
 
         let mut temp_vec = Vec::new();
@@ -196,11 +220,17 @@ pub fn double_graphic_sort(array: Array) {
         }
     
         double_sort(&mut temp_vec);
+
+        let mut temp_index = 0;
     
         for reference in temp_vec {
             let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
+
+            left_node.change_array(temp_index, &array);
     
             reference_vec.push(left_node);
+
+            temp_index += 2;
         }
     
         vector = reference_vec;
@@ -208,11 +238,6 @@ pub fn double_graphic_sort(array: Array) {
     }
 
     counter = 0;
-
-    for node in vector {
-        node.change_array(counter,&array);
-        counter += 2;
-    }
 
     //Info dump
     #[cfg(debug_assertions)]
