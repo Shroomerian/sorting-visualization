@@ -14,9 +14,8 @@ double_sort = "1.0.0"
 
 const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 0.8];
 
-
 use super::{Algorithm, Array};
-use double_sort::double_sort;
+use double_sort::double_heap_sort;
 
 #[derive(PartialEq,PartialOrd,Eq,Debug,Clone, Copy)]
 struct Node(u32,Option<u32>); 
@@ -120,7 +119,7 @@ pub fn double_graphic_sort(array: Array) {
         temp_vec.push(node.0);
     }
 
-    double_sort(&mut temp_vec);
+    double_heap_sort(&mut temp_vec);
 
     for reference in temp_vec {
         let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
@@ -219,7 +218,7 @@ pub fn double_graphic_sort(array: Array) {
             temp_vec.push(node.0);
         }
     
-        double_sort(&mut temp_vec);
+        double_heap_sort(&mut temp_vec);
 
         let mut temp_index = 0;
     
