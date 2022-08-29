@@ -28,6 +28,7 @@ cargo run -- --list
 
 - CLI
 - Supports different algorithms (IDs are in brackets):
+  - [Double Sort](https://github.com/Shroomerian/double_sort) \[`double_sort`\]
   - [Bubble sort](https://en.wikipedia.org/wiki/Bubble_sort) \[`bubble`\]
   - [Cocktail sort](https://en.wikipedia.org/wiki/Cocktail_shaker_sort) \[`cocktail`\]
   - [Cycle sort](https://en.wikipedia.org/wiki/Cycle_sort) \[`cycle`\]
