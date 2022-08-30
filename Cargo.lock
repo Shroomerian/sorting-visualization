@@ -194,7 +194,9 @@ dependencies = [
 
 [[package]]
 name = "double_sort"
-version = "1.1.1"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "def6db8249b026a358dd695ff5a77b2b7f0cf2e6f8432c56e311ddd868918d13"
 
 [[package]]
 name = "either"
