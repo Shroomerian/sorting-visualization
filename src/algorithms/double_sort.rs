@@ -8,7 +8,7 @@ Grouping elements by nodes allows a simple loop statement to order the whole vec
 
 ```toml
 [dependencies]
-double_sort = "1.0.0"
+double_sort = "1.1.1"
 ```
 */
 
@@ -121,8 +121,8 @@ pub fn double_graphic_sort(array: Array) {
 
     double_heap_sort(&mut temp_vec);
 
-    for reference in temp_vec {
-        let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
+    for reference in &temp_vec {
+        let left_node = *vector.iter().find(|x| x.contains(*reference) == true).unwrap();
 
         left_node.change_array(index, &array);
 
@@ -139,6 +139,12 @@ pub fn double_graphic_sort(array: Array) {
 
     //Final sort of the values by comparing left and right values of neighbouring nodes
     loop {
+
+        let mut reference_vec = Vec::new();
+
+        for node in &vector {
+            reference_vec.push(node.0);
+        }
 
         let mut left = vector[counter];
 
@@ -211,28 +217,31 @@ pub fn double_graphic_sort(array: Array) {
 
         //Everything is pushed back into the heap so nothing is lost.
 
-        let mut temp_vec = Vec::new();
+        let mut temporary_vec = Vec::new();
         let mut reference_vec = Vec::new();
 
         for node in &vector {
-            temp_vec.push(node.0);
+            temporary_vec.push(node.0);
         }
     
-        double_heap_sort(&mut temp_vec);
+        double_heap_sort(&mut temporary_vec);
+
+        if temporary_vec != temp_vec {
 
         let mut temp_index = 0;
     
-        for reference in temp_vec {
-            let left_node = *vector.iter().find(|x| x.contains(reference) == true).unwrap();
+            for reference in &temporary_vec {
+                let left_node = *vector.iter().find(|x| x.contains(*reference) == true).unwrap();
 
-            left_node.change_array(temp_index, &array);
+                left_node.change_array(temp_index, &array);
+        
+                reference_vec.push(left_node);
+
+                temp_index += 2;
+            }
     
-            reference_vec.push(left_node);
-
-            temp_index += 2;
+            vector = reference_vec;
         }
-    
-        vector = reference_vec;
 
     }
 
