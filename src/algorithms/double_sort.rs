@@ -8,7 +8,7 @@ Grouping elements by nodes allows a simple loop statement to order the whole vec
 
 ```toml
 [dependencies]
-double_sort = "1.1.1"
+double_sort = "1.2.0"
 ```
 */
 
