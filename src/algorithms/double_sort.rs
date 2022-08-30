@@ -163,6 +163,15 @@ pub fn double_graphic_sort(array: Array) {
             switched = switch(&mut left.0,&mut right.0);
         }
 
+        let mut end_left = vector[vector.len() - 2];
+        let mut end_right = vector[vector.len() - 1];
+
+        if let Some(_number) = end_left.1 {
+            switch(end_left.1.as_mut().unwrap() ,&mut end_right.0);
+        } else {
+            switch(&mut end_left.0,&mut end_right.0);
+        }
+
         if !switched {
             vector[counter] = left;
             left.sort_array(index,&array);
@@ -244,8 +253,6 @@ pub fn double_graphic_sort(array: Array) {
         }
 
     }
-
-    counter = 0;
 
     //Info dump
     #[cfg(debug_assertions)]
